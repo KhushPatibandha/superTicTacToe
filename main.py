@@ -1,5 +1,6 @@
 playerX = set()
 playerO = set()
+tie = set()
 top_list = [['' for _ in range(9)] for _ in range(9)]
 
 def check_for_win_per_cell(list_to_check, player_symbol):
@@ -30,6 +31,12 @@ def check_for_win(player_symbol):
         (0 in player_symbol and 4 in player_symbol and 8 in player_symbol) or
         (2 in player_symbol and 4 in player_symbol and 6 in player_symbol)
     )
+
+def is_cell_full(cell):
+    return all(position != '' for position in cell)
+
+def check_game_tie():
+    return all(cell in playerX or cell in playerO or cell in tie for cell in range(9))
 
 def print_single_board(board):
     lines = []
@@ -95,7 +102,7 @@ while(True):
             continue
         random_block = 0
 
-    position = int(input("Enter the position : 0-8: "))
+    position = int(input(f"Enter the position in cell number {next_cell_to_play_in} : 0-8: "))
     if position < 0 or position > 8 or top_list[next_cell_to_play_in][position] != '':
         print("Enter a valid position")
         continue
@@ -110,12 +117,17 @@ while(True):
 
     # Check if the player had won in this current cell
     # If yes, add the cell to the player's set
-    win_or_no_win = check_for_win_per_cell(top_list[next_cell_to_play_in], symbol)
-    if win_or_no_win:
+    win_or_no_win_symbol = check_for_win_per_cell(top_list[next_cell_to_play_in], symbol)
+    if win_or_no_win_symbol:
         if turn == 1:
             playerX.add(next_cell_to_play_in)
+            print("Player 1 won this cell: ", next_cell_to_play_in)
         else:
             playerO.add(next_cell_to_play_in)
+            print("Player 2 won this cell: ", next_cell_to_play_in)
+    elif is_cell_full(top_list[next_cell_to_play_in]):
+        tie.add(next_cell_to_play_in)
+        print("This cell is a tie: ", next_cell_to_play_in)
 
     # Check if the player had won the game
     # If yes, print the winner and break the loop
@@ -123,11 +135,15 @@ while(True):
     final_win_or_no_win = check_for_win(symbol)
     if final_win_or_no_win:
         print_super_board(top_list)
-        print(f"Player {turn} wins, you bamboozled that bozo. ")
+        print(f"Player {turn} wins, you bamboozled that bozo.")
+        break
+    elif check_game_tie():
+        print_super_board(top_list)
+        print("It's a tie, you both suck.")
         break
 
     next_cell_to_play_in = position
-    if next_cell_to_play_in in playerX or next_cell_to_play_in in playerO:
+    if next_cell_to_play_in in playerX or next_cell_to_play_in in playerO or next_cell_to_play_in in tie:
         random_block = 1
 
     turn = 1 if turn == 2 else 2
