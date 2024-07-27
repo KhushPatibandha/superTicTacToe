@@ -1,3 +1,8 @@
+from colorama import Fore, init, Style
+import os
+
+init(autoreset=True)
+
 playerX = set()
 playerO = set()
 tie = set()
@@ -38,6 +43,9 @@ def is_cell_full(cell):
 def check_game_tie():
     return all(cell in playerX or cell in playerO or cell in tie for cell in range(9))
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 def print_single_board(board):
     lines = []
     for i in range(0, 9, 3):
@@ -72,39 +80,45 @@ def print_super_board(top_list):
         print(line)
 
 # Driver Code
-print("Welcome to Super Tic Tac Toe")
-print("Player 1: X")
-print("Player 2: O")
+print(f"{Fore.GREEN}{Style.BRIGHT}Welcome to Super Tic Tac Toe")
+print(f"{Fore.GREEN}{Style.BRIGHT}Player 1: X")
+print(f"{Fore.GREEN}{Style.BRIGHT}Player 2: O")
 
 print_super_board(top_list)
-print("Player 1's turn")
-cell_number = int(input("Enter the cell number to start: 0-8: "))
-position = int(input("Enter the position to start: 0-8: "))
+print(f"{Fore.BLUE}{Style.BRIGHT}Player 1's turn")
+cell_number = int(input(f"{Fore.GREEN}Enter the cell number to start: 0-8: "))
+position = int(input(f"{Fore.GREEN}{Style.BRIGHT}Enter the position to start: 0-8: "))
 
 top_list[cell_number][position] = 'X'
 next_cell_to_play_in = position
 
 random_block = 0
+no_print_invalid = 1
 turn = 2
 while(True):
-    print_super_board(top_list)
-    print(f"Player {turn}'s turn")
+    if no_print_invalid == 1:
+        clear_screen()
+        print_super_board(top_list)
+    no_print_invalid = 1
+    print(f"{Fore.BLUE}{Style.BRIGHT}Player {turn}'s turn")
 
     if random_block == 1:
-        print("You can play in any cell")
-        next_cell_to_play_in = int(input("Enter the cell number to play in: "))
+        print(f"{Fore.GREEN}{Style.BRIGHT}You can play in any cell")
+        next_cell_to_play_in = int(input(f"{Fore.GREEN}{Style.BRIGHT}Enter the cell number to play in: "))
 
         # Check if the inputed cell is already won by a player or not
         # If yes, ask the player to enter a valid cell
         # Else, continue the game
         if next_cell_to_play_in in playerX or next_cell_to_play_in in playerO:
-            print("Enter a valid cell")
+            print(f"{Fore.RED}{Style.BRIGHT}Enter a valid cell")
+            no_print_invalid = 0
             continue
         random_block = 0
 
-    position = int(input(f"Enter the position in cell number {next_cell_to_play_in} : 0-8: "))
+    position = int(input(f"{Fore.GREEN}{Style.BRIGHT}Enter the position in cell number {next_cell_to_play_in} : 0-8: "))
     if position < 0 or position > 8 or top_list[next_cell_to_play_in][position] != '':
-        print("Enter a valid position")
+        print(f"{Fore.RED}{Style.BRIGHT}Enter a valid position")
+        no_print_invalid = 0
         continue
 
     symbol = 'X'
@@ -121,13 +135,13 @@ while(True):
     if win_or_no_win_symbol:
         if turn == 1:
             playerX.add(next_cell_to_play_in)
-            print("Player 1 won this cell: ", next_cell_to_play_in)
+            print(f"{Fore.CYAN}{Style.BRIGHT}Player 1 won this cell: ", next_cell_to_play_in)
         else:
             playerO.add(next_cell_to_play_in)
-            print("Player 2 won this cell: ", next_cell_to_play_in)
+            print(f"{Fore.CYAN}{Style.BRIGHT}Player 2 won this cell: ", next_cell_to_play_in)
     elif is_cell_full(top_list[next_cell_to_play_in]):
         tie.add(next_cell_to_play_in)
-        print("This cell is a tie: ", next_cell_to_play_in)
+        print(f"{Fore.CYAN}{Style.BRIGHT}This cell is a tie: ", next_cell_to_play_in)
 
     # Check if the player had won the game
     # If yes, print the winner and break the loop
@@ -135,11 +149,11 @@ while(True):
     final_win_or_no_win = check_for_win(symbol)
     if final_win_or_no_win:
         print_super_board(top_list)
-        print(f"Player {turn} wins, you bamboozled that bozo.")
+        print(f"{Fore.CYAN}{Style.BRIGHT}Player {turn} wins, you bamboozled that bozo.")
         break
     elif check_game_tie():
         print_super_board(top_list)
-        print("It's a tie, you both suck.")
+        print(f"{Fore.CYAN}{Style.BRIGHT}It's a tie, you both suck.")
         break
 
     next_cell_to_play_in = position
