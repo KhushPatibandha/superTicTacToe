@@ -79,6 +79,17 @@ def print_super_board(top_list):
     for line in super_board:
         print(line)
 
+def get_valid_input(prompt, valid_range):
+    while True:
+        try:
+            value = int(input(prompt))
+            if value in valid_range:
+                return value
+            else:
+                print(f"{Fore.RED}{Style.BRIGHT}Enter a valid number between 0 and 8.")
+        except ValueError:
+            print(f"{Fore.RED}{Style.BRIGHT}Invalid input. Please enter a number between 0 and 8.")
+
 # Driver Code
 print(f"{Fore.GREEN}{Style.BRIGHT}Welcome to Super Tic Tac Toe")
 print(f"{Fore.GREEN}{Style.BRIGHT}Player 1: X")
@@ -86,8 +97,8 @@ print(f"{Fore.GREEN}{Style.BRIGHT}Player 2: O")
 
 print_super_board(top_list)
 print(f"{Fore.BLUE}{Style.BRIGHT}Player 1's turn")
-cell_number = int(input(f"{Fore.GREEN}Enter the cell number to start: 0-8: "))
-position = int(input(f"{Fore.GREEN}{Style.BRIGHT}Enter the position to start: 0-8: "))
+cell_number = get_valid_input(f"{Fore.GREEN}Enter the cell number to start: 0-8: ", range(9))
+position = get_valid_input(f"{Fore.GREEN}{Style.BRIGHT}Enter the position to start: 0-8: ", range(9))
 
 top_list[cell_number][position] = 'X'
 next_cell_to_play_in = position
@@ -95,16 +106,20 @@ next_cell_to_play_in = position
 random_block = 0
 no_print_invalid = 1
 turn = 2
+message = ""
 while(True):
     if no_print_invalid == 1:
         clear_screen()
         print_super_board(top_list)
+        if message:
+            print(message)
+            message = ""
     no_print_invalid = 1
     print(f"{Fore.BLUE}{Style.BRIGHT}Player {turn}'s turn")
 
     if random_block == 1:
         print(f"{Fore.GREEN}{Style.BRIGHT}You can play in any cell")
-        next_cell_to_play_in = int(input(f"{Fore.GREEN}{Style.BRIGHT}Enter the cell number to play in: "))
+        next_cell_to_play_in = get_valid_input(f"{Fore.GREEN}{Style.BRIGHT}Enter the cell number to play in: ", range(9))
 
         # Check if the inputed cell is already won by a player or not
         # If yes, ask the player to enter a valid cell
@@ -115,7 +130,7 @@ while(True):
             continue
         random_block = 0
 
-    position = int(input(f"{Fore.GREEN}{Style.BRIGHT}Enter the position in cell number {next_cell_to_play_in} : 0-8: "))
+    position = get_valid_input(f"{Fore.GREEN}{Style.BRIGHT}Enter the position in cell number {next_cell_to_play_in} : 0-8: ", range(9))
     if position < 0 or position > 8 or top_list[next_cell_to_play_in][position] != '':
         print(f"{Fore.RED}{Style.BRIGHT}Enter a valid position")
         no_print_invalid = 0
@@ -135,13 +150,13 @@ while(True):
     if win_or_no_win_symbol:
         if turn == 1:
             playerX.add(next_cell_to_play_in)
-            print(f"{Fore.CYAN}{Style.BRIGHT}Player 1 won this cell: ", next_cell_to_play_in)
+            message = f"{Fore.CYAN}{Style.BRIGHT}Player 1 won in cell number: {next_cell_to_play_in}"
         else:
             playerO.add(next_cell_to_play_in)
-            print(f"{Fore.CYAN}{Style.BRIGHT}Player 2 won this cell: ", next_cell_to_play_in)
+            message = f"{Fore.CYAN}{Style.BRIGHT}Player 2 won in cell number: {next_cell_to_play_in}"
     elif is_cell_full(top_list[next_cell_to_play_in]):
         tie.add(next_cell_to_play_in)
-        print(f"{Fore.CYAN}{Style.BRIGHT}This cell is a tie: ", next_cell_to_play_in)
+        message = f"{Fore.CYAN}{Style.BRIGHT}Cell number {next_cell_to_play_in} is a tie."
 
     # Check if the player had won the game
     # If yes, print the winner and break the loop
