@@ -163,10 +163,12 @@ while(True):
     # Else, continue the game
     final_win_or_no_win = check_for_win(symbol)
     if final_win_or_no_win:
+        clear_screen()
         print_super_board(top_list)
         print(f"{Fore.CYAN}{Style.BRIGHT}Player {turn} wins, you bamboozled that bozo.")
         break
     elif check_game_tie():
+        clear_screen()
         print_super_board(top_list)
         print(f"{Fore.CYAN}{Style.BRIGHT}It's a tie, you both suck.")
         break
