@@ -12,62 +12,12 @@ GREEN = (0, 255, 0)
 next_cell_to_play_in = None
 turn = 0
 game_over = False
+winner = None
 
 playerX = set()
 playerO = set()
 tie = set()
 top_list = [['' for _ in range(9)] for _ in range(9)]
-winner = None
-
-def draw_board():
-    for x in range(1, 9):
-        pygame.draw.line(screen, BLACK, (x * WIDTH // 9, 0), (x * WIDTH // 9, HEIGHT), 2)
-        pygame.draw.line(screen, BLACK, (0, x * HEIGHT // 9), (WIDTH, x * HEIGHT // 9), 2)
-    for y in range(1, 3):
-        pygame.draw.line(screen, BLACK, (y * WIDTH // 3, 0), (y * WIDTH // 3, HEIGHT), 4)
-        pygame.draw.line(screen, BLACK, (0, y * HEIGHT // 3), (WIDTH, y * HEIGHT // 3), 4)
-
-# Draw Marks
-def draw_marks():
-    for row in range(9):
-        for col in range(9):
-            if top_list[row][col] != '':
-                mark = top_list[row][col]
-                x = 300*(row%3) + 50 + 100*(col%3)
-                y = 300*(row//3) + 50 + 100*(col//3)
-                font = pygame.font.Font(None, 72)
-                text = font.render(mark, True, BLACK)
-                screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
-
-# placing marks
-def place_mark(row, col, player):
-    if top_list[row][col] == '':
-        top_list[row][col] = player
-        return True
-    return False
-
-def is_cell_full(cell):
-    return all(position != '' for position in cell)
-
-def check_game_tie():
-    return all(cell in playerX or cell in playerO or cell in tie for cell in range(9))
-
-def valid_cell(cell):
-    global next_cell_to_play_in,game_over
-
-    if game_over:
-        return False
-    if next_cell_to_play_in == None:
-        return True
-    if cell in playerO or cell in playerX:
-        return False
-    elif next_cell_to_play_in in playerX or next_cell_to_play_in in playerO:
-        return True
-    elif cell == next_cell_to_play_in:
-        return True
-    elif is_cell_full(top_list[next_cell_to_play_in]):
-        return True
-
 
 def check_for_win_per_cell(list_to_check, player_symbol):
     return (
@@ -98,11 +48,60 @@ def check_for_win(player_symbol):
         (2 in player_symbol and 4 in player_symbol and 6 in player_symbol)
     )
 
+def is_cell_full(cell):
+    return all(position != '' for position in cell)
+
+def check_game_tie():
+    return all(cell in playerX or cell in playerO or cell in tie for cell in range(9))
+
 def highlight_next_cell():
     if next_cell_to_play_in is not None and not game_over:
         x = (next_cell_to_play_in % 3) * 300
         y = (next_cell_to_play_in // 3) * 300
         pygame.draw.rect(screen, GREEN, (x, y, 300, 300), 5)
+
+def valid_cell(cell):
+    global next_cell_to_play_in,game_over
+
+    if game_over:
+        return False
+    if next_cell_to_play_in == None:
+        return True
+    if cell in playerO or cell in playerX:
+        return False
+    elif next_cell_to_play_in in playerX or next_cell_to_play_in in playerO:
+        return True
+    elif cell == next_cell_to_play_in:
+        return True
+    elif is_cell_full(top_list[next_cell_to_play_in]):
+        return True
+
+def draw_board():
+    for x in range(1, 9):
+        pygame.draw.line(screen, BLACK, (x * WIDTH // 9, 0), (x * WIDTH // 9, HEIGHT), 2)
+        pygame.draw.line(screen, BLACK, (0, x * HEIGHT // 9), (WIDTH, x * HEIGHT // 9), 2)
+    for y in range(1, 3):
+        pygame.draw.line(screen, BLACK, (y * WIDTH // 3, 0), (y * WIDTH // 3, HEIGHT), 4)
+        pygame.draw.line(screen, BLACK, (0, y * HEIGHT // 3), (WIDTH, y * HEIGHT // 3), 4)
+
+# Draw Marks
+def draw_marks():
+    for row in range(9):
+        for col in range(9):
+            if top_list[row][col] != '':
+                mark = top_list[row][col]
+                x = 300*(row%3) + 50 + 100*(col%3)
+                y = 300*(row//3) + 50 + 100*(col//3)
+                font = pygame.font.Font(None, 72)
+                text = font.render(mark, True, BLACK)
+                screen.blit(text, (x - text.get_width() // 2, y - text.get_height() // 2))
+
+# placing marks
+def place_mark(row, col, player):
+    if top_list[row][col] == '':
+        top_list[row][col] = player
+        return True
+    return False
 
 # handling clicks
 def handle_click(pos):
@@ -136,11 +135,10 @@ def handle_click(pos):
     else:
         print("Enter a valid cell")
 
+# Driver code
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption("Super Tic Tac Toe")
-
 running = True
-
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
