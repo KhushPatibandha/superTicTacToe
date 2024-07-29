@@ -7,6 +7,7 @@ pygame.init()
 WIDTH, HEIGHT = 900, 900
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
 
 next_cell_to_play_in = None
 turn = 0
@@ -16,6 +17,7 @@ playerX = set()
 playerO = set()
 tie = set()
 top_list = [['' for _ in range(9)] for _ in range(9)]
+winner = None
 
 def draw_board():
     for x in range(1, 9):
@@ -47,6 +49,9 @@ def place_mark(row, col, player):
 def is_cell_full(cell):
     return all(position != '' for position in cell)
 
+def check_game_tie():
+    return all(cell in playerX or cell in playerO or cell in tie for cell in range(9))
+
 def valid_cell(cell):
     global next_cell_to_play_in,game_over
 
@@ -62,8 +67,8 @@ def valid_cell(cell):
         return True
     elif is_cell_full(top_list[next_cell_to_play_in]):
         return True
-    
-    
+
+
 def check_for_win_per_cell(list_to_check, player_symbol):
     return (
         (list_to_check[0] == player_symbol and list_to_check[1] == player_symbol and list_to_check[2] == player_symbol) or
@@ -75,7 +80,7 @@ def check_for_win_per_cell(list_to_check, player_symbol):
         (list_to_check[0] == player_symbol and list_to_check[4] == player_symbol and list_to_check[8] == player_symbol) or
         (list_to_check[2] == player_symbol and list_to_check[4] == player_symbol and list_to_check[6] == player_symbol)
     )
-        
+
 def check_for_win(player_symbol):
     if(player_symbol == 'X'):
         player_symbol = playerX
@@ -93,10 +98,17 @@ def check_for_win(player_symbol):
         (2 in player_symbol and 4 in player_symbol and 6 in player_symbol)
     )
 
-# handling clicks 
+def highlight_next_cell():
+    if next_cell_to_play_in is not None and not game_over:
+        x = (next_cell_to_play_in % 3) * 300
+        y = (next_cell_to_play_in // 3) * 300
+        pygame.draw.rect(screen, GREEN, (x, y, 300, 300), 5)
+
+# handling clicks
 def handle_click(pos):
-    global turn, next_cell_to_play_in, game_over
-    
+    symbol = ''
+    global turn, next_cell_to_play_in, game_over, winner
+
     if turn == 0:
         symbol = 'X'
     if turn == 1:
@@ -110,13 +122,18 @@ def handle_click(pos):
                     playerX.add(cell_number)
                 else:
                     playerO.add(cell_number)
-                
+
                 if check_for_win(symbol):
                     game_over = True
+                    winner = f"Player {symbol}"
 
             next_cell_to_play_in = position
-            turn = int(not turn)
-    else: 
+            turn = 1- turn
+
+            if check_game_tie():
+                game_over = True
+                winner = 'Tie'
+    else:
         print("Enter a valid cell")
 
 screen = pygame.display.set_mode((WIDTH,HEIGHT))
@@ -128,15 +145,22 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
             handle_click(event.pos)
     screen.fill(WHITE)
     draw_board()
     draw_marks()
     if game_over:
-        pass
-    font = pygame.font.Font(None,200)
-    text = font.render(f"Game Over!!",True,BLACK)
-    screen.blit(text,(25,350))
-    
+            font = pygame.font.Font(None, 100)
+            if winner == "Tie":
+                text = font.render("It's a tie!", True, GREEN)
+            else:
+                text = font.render(f"{winner} wins!", True, GREEN)
+            text_rect = text.get_rect(center=(WIDTH//2, HEIGHT//2))
+            screen.blit(text, text_rect)
+
+    highlight_next_cell()
     pygame.display.flip()
+
+pygame.quit()
+sys.exit()
