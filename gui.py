@@ -13,6 +13,7 @@ next_cell_to_play_in = None
 turn = 0
 game_over = False
 winner = None
+cell_number = None
 
 playerX = set()
 playerO = set()
@@ -55,11 +56,17 @@ def check_game_tie():
     return all(cell in playerX or cell in playerO or cell in tie for cell in range(9))
 
 def highlight_next_cell():
+    global cell_number
     if next_cell_to_play_in is not None and not game_over:
         x = (next_cell_to_play_in % 3) * 300
         y = (next_cell_to_play_in // 3) * 300
         pygame.draw.rect(screen, GREEN, (x, y, 300, 300), 5)
-
+    if next_cell_to_play_in is None:
+        for i in range(9):
+            if i not in playerX and i not in playerO and i not in tie and not is_cell_full(top_list[i]) and i != cell_number:
+                x = (i % 3) * 300
+                y = (i // 3) * 300
+                pygame.draw.rect(screen, GREEN, (x, y, 300, 300), 5)
 def valid_cell(cell):
     global next_cell_to_play_in,game_over
 
@@ -86,6 +93,14 @@ def draw_board():
 
 # Draw Marks
 def draw_marks():
+    for cell in playerX:
+        font = pygame.font.Font(None, 370)
+        text = font.render("X", True, BLACK)
+        screen.blit(text, (300*(cell%3) + 50, 300*(cell//3) + 50))
+    for cell in playerO:
+        font = pygame.font.Font(None, 370)
+        text = font.render("O", True, BLACK)
+        screen.blit(text, (300*(cell%3) + 50, 300*(cell//3) + 50))
     for row in range(9):
         for col in range(9):
             if top_list[row][col] != '':
@@ -105,6 +120,7 @@ def place_mark(row, col, player):
 
 # handling clicks
 def handle_click(pos):
+    global cell_number
     symbol = ''
     global turn, next_cell_to_play_in, game_over, winner
 
@@ -126,9 +142,12 @@ def handle_click(pos):
                     game_over = True
                     winner = f"Player {symbol}"
 
-            next_cell_to_play_in = position
-            turn = 1- turn
+            if position in playerX or position in playerO or is_cell_full(top_list[position]) or position in tie:
+                next_cell_to_play_in = None
+            else:
+                next_cell_to_play_in = position
 
+            turn = 1- turn
             if check_game_tie():
                 game_over = True
                 winner = 'Tie'
