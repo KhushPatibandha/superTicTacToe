@@ -13,7 +13,6 @@ next_cell_to_play_in = None
 turn = 0
 game_over = False
 winner = None
-cell_number = None
 
 playerX = set()
 playerO = set()
@@ -56,14 +55,13 @@ def check_game_tie():
     return all(cell in playerX or cell in playerO or cell in tie for cell in range(9))
 
 def highlight_next_cell():
-    global cell_number
     if next_cell_to_play_in is not None and not game_over:
         x = (next_cell_to_play_in % 3) * 300
         y = (next_cell_to_play_in // 3) * 300
         pygame.draw.rect(screen, GREEN, (x, y, 300, 300), 5)
     if next_cell_to_play_in is None:
         for i in range(9):
-            if i not in playerX and i not in playerO and i not in tie and not is_cell_full(top_list[i]) and i != cell_number:
+            if i not in playerX and i not in playerO and i not in tie and not is_cell_full(top_list[i]):
                 x = (i % 3) * 300
                 y = (i // 3) * 300
                 pygame.draw.rect(screen, GREEN, (x, y, 300, 300), 5)
@@ -120,7 +118,6 @@ def place_mark(row, col, player):
 
 # handling clicks
 def handle_click(pos):
-    global cell_number
     symbol = ''
     global turn, next_cell_to_play_in, game_over, winner
 
